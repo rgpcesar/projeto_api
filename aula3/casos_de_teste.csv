@@ -1,0 +1,9 @@
+title,body,userId,expected_status
+"Post Válido 1","Corpo do post 1",1,201
+"Post Válido 2","Corpo do post 2",2,201
+"Título com Caracteres Especiais @#$%","Corpo com números 12345",3,201
+"Post com Título Longo...","Corpo do post",4,201
+"Post com Corpo Longo...","Este é um corpo de post muito longo...",5,201
+"Título Vazio","Corpo para título vazio",6,201
+"Corpo Vazio","Título para corpo vazio",7,201
+"Post com userId inválido","Corpo do post",999,201

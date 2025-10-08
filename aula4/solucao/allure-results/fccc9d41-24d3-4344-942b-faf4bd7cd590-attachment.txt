@@ -1,0 +1,4 @@
+[32mINFO    [0m tests.test_github_api:test_github_api.py:49 --- Starting test: test_list_user_repositories ---
+[32mINFO    [0m tests.test_github_api:test_github_api.py:55 Requesting URL: https://api.github.com/users/google/repos with params: {'per_page': 5}
+[32mINFO    [0m tests.test_github_api:test_github_api.py:57 Response Status Code: 200
+[32mINFO    [0m tests.test_github_api:test_github_api.py:65 --- Finished test: test_list_user_repositories ---

@@ -1,0 +1,4 @@
+[32mINFO    [0m tests.test_github_api:test_github_api.py:17 --- Starting test: test_get_specific_user ---
+[32mINFO    [0m tests.test_github_api:test_github_api.py:23 Requesting URL: https://api.github.com/users/octocat
+[32mINFO    [0m tests.test_github_api:test_github_api.py:25 Response Status Code: 200
+[32mINFO    [0m tests.test_github_api:test_github_api.py:38 --- Finished test: test_get_specific_user ---

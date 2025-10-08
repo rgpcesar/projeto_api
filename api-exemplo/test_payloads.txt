@@ -1,0 +1,104 @@
+# User Payloads
+
+## Create User (POST /users)
+```json
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password"
+}
+```
+
+## Create User - Missing Fields (POST /users)
+```json
+{
+  "username": "testuser"
+}
+```
+
+## Update User (PUT /users/{user_id})
+```json
+{
+  "username": "newusername"
+}
+```
+
+# Post Payloads
+
+## Create Post (POST /posts)
+```json
+{
+  "title": "Test Post",
+  "content": "This is a test post."
+}
+```
+
+## Create Post - Missing Title (POST /posts)
+```json
+{
+  "content": "This is a test post."
+}
+```
+
+## Create Post - Missing Content (POST /posts)
+```json
+{
+  "title": "Test Post"
+}
+```
+
+## Create Post - Special Characters in Title (POST /posts)
+```json
+{
+  "title": "Test Post!",
+  "content": "This is a test post."
+}
+```
+
+## Create Post - No Data (POST /posts)
+```json
+{}
+```
+
+## Update Post (PUT /posts/{post_id})
+```json
+{
+  "title": "New Title"
+}
+```
+
+# CSV Post Payloads
+
+## Create User and Post from CSV (POST /users and POST /posts)
+This is a representation of the data from the CSV file.
+
+### User 1
+```json
+{
+  "username": "testuser1",
+  "email": "test1@example.com",
+  "password": "password"
+}
+```
+### Post 1
+```json
+{
+  "title": "CSV Post 1",
+  "content": "Content for CSV post 1."
+}
+```
+
+### User 2
+```json
+{
+  "username": "testuser2",
+  "email": "test2@example.com",
+  "password": "password"
+}
+```
+### Post 2
+```json
+{
+  "title": "CSV Post 2",
+  "content": "Content for CSV post 2."
+}

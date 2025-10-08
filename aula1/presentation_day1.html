@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing with Python - Day 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            color: #d44950;
+        }
+        .slide {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testing with Python - Day 1</h1>
+    <h3>Introduction to APIs, REST, JSON, and HTTP</h3>
+
+    <div class="slide">
+        <h2>1. What is an API?</h2>
+        <p>API stands for <strong>Application Programming Interface</strong>.</p>
+        <p>Simply put, an API is a set of rules and definitions that allows different applications to communicate with each other. It acts as an intermediary, receiving requests, processing them, and returning responses.</p>
+        <h4>Examples:</h4>
+        <ul>
+            <li><strong>Google Maps API:</strong> Allows delivery websites to show the location of restaurants on a map.</li>
+            <li><strong>Twitter API:</strong> Allows third-party applications to post tweets or read timelines.</li>
+            <li><strong>Payment API:</strong> Allows an e-commerce store to process credit card payments through a financial system.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <h2>2. What is a Protocol?</h2>
+        <p>A protocol is a set of rules and standards that govern communication between systems. It defines the format, order, and meaning of the exchanged messages.</p>
+        <p>Think of a protocol as a common language that two systems use to understand each other. Without it, communication would be chaotic and ineffective.</p>
+        <h4>Examples of Internet Protocols:</h4>
+        <ul>
+            <li><strong>IP (Internet Protocol):</strong> Responsible for addressing and routing data packets.</li>
+            <li><strong>TCP (Transmission Control Protocol):</strong> Ensures reliable and ordered data delivery.</li>
+            <li><strong>HTTP (Hypertext Transfer Protocol):</strong> Used for communication between web browsers and servers.</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <h2>What is the Web?</h2>
+        <p>The World Wide Web, or simply the Web, is a global system of interconnected hypermedia documents that are accessed via the Internet. With a browser, a user can view websites that may contain text, images, videos, and other multimedia, and navigate between them using hyperlinks.</p>
+    </div>
+
+    <div class="slide">
+        <h2>3. Protocols and Web Requests</h2>
+        <p>On the web, the most common protocol for communication between a client (like your browser) and a server (where a website is hosted) is <strong>HTTP</strong>.</p>
+        <p>When you type an address in your browser, it sends an <strong>HTTP request</strong> to the server. The server processes this request and sends back an <strong>HTTP response</strong>, which contains the page's content (HTML, CSS, images, etc.).</p>
+    </div>
+
+    <div class="slide">
+        <h2>4. HTTP Requests</h2>
+        <p>An HTTP request is composed of a few main elements:</p>
+        <ul>
+            <li><strong>Method (Verb):</strong> Indicates the desired action. The most common are:
+                <ul>
+                    <li><code>GET</code>: Requests data from a resource. (e.g., Fetch a user)</li>
+                    <li><code>POST</code>: Sends data to create a new resource. (e.g., Create a new user)</li>
+                    <li><code>PUT</code>: Updates an existing resource. (e.g., Change a user's data)</li>
+                    <li><code>DELETE</code>: Removes a resource. (e.g., Delete a user)</li>
+                </ul>
+            </li>
+            <li><strong>URL (Endpoint):</strong> The address of the resource you want to access.</li>
+            <li><strong>Headers:</strong> Metadata about the request (e.g., content type, authentication).</li>
+            <li><strong>Body:</strong> The data sent in the request (used in <code>POST</code> and <code>PUT</code>).</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <h2>5. What is a JSON?</h2>
+        <p>JSON stands for <strong>JavaScript Object Notation</strong>. It is a lightweight, human-readable text format for data exchange.</p>
+        <p>Despite its name, it is language-independent and widely used in APIs to structure the information sent and received.</p>
+        <h4>JSON Example:</h4>
+        <pre><code>{
+  "login": "octocat",
+  "id": 1,
+  "node_id": "MDQ6VXNlcjE=",
+  "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/octocat",
+  "html_url": "https://github.com/octocat",
+  "followers_url": "https://api.github.com/users/octocat/followers",
+  "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+  "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+  "organizations_url": "https://api.github.com/users/octocat/orgs",
+  "repos_url": "https://api.github.com/users/octocat/repos",
+  "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/octocat/received_events",
+  "type": "User",
+  "site_admin": false
+}</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>6. What is a REST/RESTful API?</h2>
+        <p><strong>REST</strong> (Representational State Transfer) is an architectural style for designing networked APIs.</p>
+        <p>An API that follows REST principles is called <strong>RESTful</strong>. These principles include:</p>
+        <ul>
+            <li><strong>Client-Server Communication:</strong> Clear separation of responsibilities.</li>
+            <li><strong>Stateless:</strong> Each client request must contain all the information needed for the server to understand it. The server does not store session state.</li>
+            <li><strong>Use of HTTP Methods:</strong> Uses HTTP verbs (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>) to manipulate resources.</li>
+            <li><strong>Uniform Interface:</strong> Resources are identified by URIs (e.g., <code>/users/octocat</code>).</li>
+        </ul>
+    </div>
+
+    <div class="slide">
+        <h2>7. API Introduction: GitHub API</h2>
+        <p>For our exercises, we will use the <a href="https://docs.github.com/en/rest" target="_blank">GitHub API</a>, a free and public RESTful API that provides data about users, repositories, and other interactions on GitHub.</p>
+        <p>It is excellent for learning because many of its endpoints do not require authentication and it has clear and complete documentation.</p>
+        <h4>Endpoint Example:</h4>
+        <p>To fetch data about the user "octocat", we make a <code>GET</code> request to:</p>
+        <pre><code>https://api.github.com/users/octocat</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>8. Installing and Using Insomnia</h2>
+        <p><strong>Insomnia</strong> is a graphical tool for testing APIs. It makes it easy to send HTTP requests, view responses, and organize tests.</p>
+        <h4>Installation:</h4>
+        <ol>
+            <li>Go to the official website: <a href="https://insomnia.rest/download" target="_blank">insomnia.rest</a></li>
+            <li>Download and install the version for your operating system.</li>
+        </ol>
+        <h4>Basic Usage:</h4>
+        <ol>
+            <li>Create a new request (by clicking the "+").</li>
+            <li>Choose the HTTP method (e.g., <code>GET</code>).</li>
+            <li>Enter the endpoint URL (e.g., <code>https://api.github.com/users/octocat</code>).</li>
+            <li>Click "Send" to send the request.</li>
+            <li>Analyze the response (status code, body, headers) in the right-hand panel.</li>
+        </ol>
+    </div>
+
+    <div class="slide">
+        <h2>The Python `requests` Module</h2>
+        <p>The <code>requests</code> module is the standard way to make HTTP requests in Python. It simplifies the process of interacting with APIs and websites.</p>
+        <h4>Main Features:</h4>
+        <ul>
+            <li><strong>Simple Requests:</strong> Send <code>GET</code>, <code>POST</code>, <code>PUT</code>, etc., requests with a single line of code.</li>
+            <li><strong>Passing Parameters:</strong> Easily add URL parameters.</li>
+            <li><strong>JSON Handling:</strong> Decode JSON responses with a simple method (<code>.json()</code>).</li>
+            <li><strong>Session Management:</strong> Maintain parameters and cookies across requests.</li>
+        </ul>
+        <pre><code># Example of a basic GET request
+import requests
+
+response = requests.get('https://api.github.com')
+print(response.status_code)
+print(response.json())</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>9. Practical Task: Python and the GitHub API</h2>
+        <p>Now, let's get our hands dirty! The task consists of several steps, from the simplest to the most challenging, to interact with the GitHub API using Python.</p>
+        <h4>Environment Setup:</h4>
+        <ol>
+            <li><strong>Create a Virtual Environment (venv):</strong>
+                <pre><code>python -m venv venv</code></pre>
+                <pre><code>source venv/bin/activate  # On macOS/Linux</code></pre>
+                <pre><code>venv\Scripts\activate  # On Windows</code></pre>
+            </li>
+            <li><strong>Install the <code>requests</code> Library:</strong>
+                <pre><code>pip install requests</code></pre>
+            </li>
+        </ol>
+        <p>With the environment ready, let's move on to the challenges!</p>
+    </div>
+
+    <div class="slide">
+        <h2>Practical Challenges with Python and GitHub API</h2>
+        <p>API Documentation: <a href="https://docs.github.com/en/rest" target="_blank">https://docs.github.com/en/rest</a></p>
+        <p>Base Endpoint: <code>https://api.github.com</code></p>
+
+        <h3>Step 1: Simple Request</h3>
+        <p>Make a GET request to the GitHub API base endpoint and check if the status code is 200.</p>
+
+        <h3>Step 2: Fetch a Specific User</h3>
+        <p>Fetch the data for the user "octocat" and print their name.</p>
+
+        <h3>Step 3: Validate User Type</h3>
+        <p>Check if "octocat" is of type "User".</p>
+
+        <h3>Step 4: Request with Repository ID</h3>
+        <p>Fetch the repository with ID 1296269 and check if it is "Hello-World".</p>
+
+        <h3>Step 5: Handling Errors (Non-existent User)</h3>
+        <p>Try to fetch a user that does not exist (e.g., "nonexistentuser12345") and check if the status code is 404 (Not Found).</p>
+
+        <h3>Step 6: List User Repositories</h3>
+        <p>Make a request to list the repositories of the user "google" with a limit of 5 and print the name of the first one in the list.</p>
+
+        <h3>Step 7: Navigate Follower Pagination</h3>
+        <p>List the followers of the user "microsoft", get the URL of the next page from the 'Link' header, and make a new request.</p>
+
+        <h3>Step 8: Count a User's Public Repositories</h3>
+        <p>Check how many public repositories the user "facebook" has.</p>
+
+        <h3>Step 9: Find a Specific Language in a Repository</h3>
+        <p>Check if the language "JavaScript" is in the list of languages for the "react" repository from Facebook.</p>
+
+        <h3>Step 10: Explore Another Endpoint (Emojis)</h3>
+        <p>Fetch the list of available emojis from the API and check if the "+1" emoji exists.</p>
+
+        <h3>Step 11: Validate Repository JSON Structure</h3>
+        <p>For the "linux" repository from "torvalds", check if the keys "name", "owner", and "language" exist in the response JSON.</p>
+
+        <h3>Step 12: Compare Repository Attributes</h3>
+        <p>Compare the "stargazers_count" of Microsoft's "vscode" repository and Atom's "atom" repository. Check if the VSCode count is higher.</p>
+
+        <h3>Step 13: Fetch a License</h3>
+        <p>Fetch the "mit" license and check its name.</p>
+
+        <h3>Step 14: List All Licenses</h3>
+        <p>Make a request to the licenses endpoint and count how many common licenses exist.</p>
+
+        <h3>Step 15: Find Repositories with a Specific License</h3>
+        <p>Search for repositories with the "apache-2.0" license and print the name of the first one in the list.</p>
+
+        <h3>Step 16: Validate a Repository's Organization</h3>
+        <p>Check if the "docker" repository belongs to the "moby" organization.</p>
+
+        <h3>Step 17: Check the Last Commit of a Repository</h3>
+        <p>From the "tensorflow/tensorflow" repository, get the last commit and check if the message is not empty.</p>
+
+        <h3>Step 18: Check if a User is an Organization</h3>
+        <p>Check if "apple" is of type "Organization".</p>
+
+        <h3>Step 19: Find the Number of Contributors to a Repository</h3>
+        <p>Fetch the number of contributors for the "kubernetes/kubernetes" repository and check if it is greater than 1000.</p>
+
+        <h3>Step 20: Final Challenge - Putting It All Together</h3>
+        <p>Create a function that takes a username, fetches their data, and returns a dictionary with their login, name, and number of public repositories. Test it with "torvalds".</p>
+    </div>
+
+    <div class="slide">
+        <h2>Practical Challenges with JSONPlaceholder API</h2>
+        <p>API Documentation: <a href="https://jsonplaceholder.typicode.com/" target="_blank">https://jsonplaceholder.typicode.com/</a></p>
+        <p>Base Endpoint: <code>https://jsonplaceholder.typicode.com</code></p>
+
+        <h3>Step 21: Create a New Post (POST)</h3>
+        <p>Make a <code>POST</code> request to <code>/posts</code> to create a new post. Check if the status code is 201 (Created).</p>
+
+        <h3>Step 22: Validate Created Post Data</h3>
+        <p>Validate that the response body of the created post contains the sent <code>title</code> and <code>body</code>.</p>
+
+        <h3>Step 23: Update a Post (PUT)</h3>
+        <p>Make a <code>PUT</code> request to <code>/posts/1</code> to update the post with ID 1. Check if the status code is 200.</p>
+
+        <h3>Step 24: Validate Post Update</h3>
+        <p>Check if the response body of the updated post contains the new data sent.</p>
+
+        <h3>Step 25: Delete a Post (DELETE)</h3>
+        <p>Make a <code>DELETE</code> request to <code>/posts/1</code> to delete the post. Check if the status code is 200.</p>
+
+        <h3>Step 26: List All Users</h3>
+        <p>Make a <code>GET</code> request to <code>/users</code> and check if the list contains 10 users.</p>
+
+        <h3>Step 27: Fetch a Specific User</h3>
+        <p>Fetch the user with ID 5 and check if their name is "Chelsey Dietrich".</p>
+
+        <h3>Step 28: Create a New Comment for a Post</h3>
+        <p>Make a <code>POST</code> request to <code>/posts/1/comments</code> to add a new comment. Check for status code 201.</p>
+
+        <h3>Step 29: List a User's Albums</h3>
+        <p>List all albums for the user with ID 3 (<code>/users/3/albums</code>) and count how many albums they have.</p>
+
+        <h3>Step 30: List Photos in an Album</h3>
+        <p>List all photos from the album with ID 2 (<code>/albums/2/photos</code>) and check if the first photo has the title "reprehenderit est deserunt velit ipsam".</p>
+
+        <h3>Step 31: Create a New Task (Todo)</h3>
+        <p>Create a new task (todo) for the user with ID 1 with the title "Learn Pytest" and check if it was created successfully.</p>
+
+        <h3>Step 32: Update a Task (PATCH)</h3>
+        <p>Update the status of the task with ID 5 to <code>completed: true</code> using a <code>PATCH</code> request. Check the response.</p>
+
+        <h3>Step 33: List a User's Completed Tasks</h3>
+        <p>List all tasks for the user with ID 1 and filter only those that are completed (<code>completed: true</code>).</p>
+
+        <h3>Step 34: Validate a Comment's Structure</h3>
+        <p>Fetch the comment with ID 10 and check if it contains the keys "postId", "id", "name", "email", and "body".</p>
+
+        <h3>Step 35: Delete a Comment</h3>
+        <p>Delete the comment with ID 3 and check if the request was successful.</p>
+
+        <h3>Step 36: Create a Post with Invalid Data</h3>
+        <p>Try to create a post by sending an empty JSON body and observe the API's response (although JSONPlaceholder might return 201, it's good practice to check the behavior).</p>
+
+        <h3>Step 37: Fetch a Specific User's Posts</h3>
+        <p>Fetch all posts from the user with ID 7 (<code>/users/7/posts</code>) and count how many posts they have.</p>
+
+        <h3>Step 38: Update a User's Email (PUT)</h3>
+        <p>Update the data for the user with ID 2, changing only the email to "new.email@example.com".</p>
+
+        <h3>Step 39: Delete an Album</h3>
+        <p>Delete the album with ID 4 and check the response status.</p>
+
+        <h3>Step 40: Final Challenge with JSONPlaceholder</h3>
+        <p>Create a function that receives a <code>userId</code>, creates a new post for them, adds a comment to that post, and then deletes the post. Validate each step.</p>
+    </div>
+</body>
+</html>

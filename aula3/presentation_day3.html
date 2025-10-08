@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing with Python - Day 3</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            color: #d44950;
+        }
+        .slide {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .concept {
+            background-color: #eef;
+            border-left: 5px solid #0056b3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testing with Python - Day 3</h1>
+    <h3>Structuring Tests, Data-Driven Testing, and Custom Markers</h3>
+
+    <div class="slide">
+        <h2>1. Refactoring Tests with `conftest.py` and Fixtures</h2>
+        <div class="concept">
+            <h4>What is `conftest.py`?</h4>
+            <p>`conftest.py` is a special file that Pytest uses to share <strong>fixtures</strong>, hooks, and plugins among multiple test files. Think of it as a "test configuration file" for a directory.</p>
+            <p>When you define a fixture in `conftest.py`, any test in the same directory (and subdirectories) can use it without needing to import it.</p>
+        </div>
+        <div class="concept">
+            <h4>What are Fixtures?</h4>
+            <p>A <strong>fixture</strong> is a function that Pytest runs before (and sometimes after) your tests. They are used to provide a baseline state or data for tests, such as:</p>
+            <ul>
+                <li>Database connections.</li>
+                <li>Pre-configured API clients.</li>
+                <li>Test data (e.g., a user object).</li>
+                <li>The base URL of an API.</li>
+            </ul>
+            <p>Fixtures help avoid repeated code and make tests cleaner and more modular.</p>
+        </div>
+
+        <h4>Example: Creating Session and Function Fixtures</h4>
+        <p>Let's refactor our tests to use two fixtures:</p>
+        <ol>
+            <li><strong>`base_url` (Session Scope):</strong> Provides the base URL of the API. Since it doesn't change, we set the scope to <code>session</code>, which means it will be created only once for the entire test session.</li>
+            <li><strong>`api_client` (Function Scope):</strong> Provides a pre-configured `requests` client. The default scope is <code>function</code>, which means a new client is created for each test function.</li>
+        </ol>
+
+        <p><strong>File: `conftest.py`</strong></p>
+        <pre><code>import pytest
+import requests
+
+@pytest.fixture(scope="session")
+def base_url():
+    """Returns the base URL for the JSONPlaceholder API."""
+    return "https://jsonplaceholder.typicode.com"
+
+@pytest.fixture(scope="function")
+def api_client():
+    """Returns an API client (requests module)."""
+    return requests
+</code></pre>
+
+        <p><strong>How to use in the test:</strong></p>
+        <pre><code># The test doesn't need to import anything from conftest.py!
+def test_get_all_posts(base_url, api_client):
+    """Tests if listing posts works."""
+    response = api_client.get(f"{base_url}/posts")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>2. Data-Driven Testing</h2>
+        <p>Instead of writing a test for each data variation, we can write a single test that runs multiple times with different inputs. This is called Data-Driven Testing.</p>
+        
+        <div class="concept">
+            <h4>What is a CSV file?</h4>
+            <p><strong>CSV (Comma-Separated Values)</strong> is a text file format that stores tabular data, where each line is a record and columns are separated by commas. It's a simple way to store test cases.</p>
+            <p><strong>Example of `test_cases.csv`:</strong></p>
+            <pre><code>title,body,userId,expected_status
+"Valid Post 1","Body of post 1",1,201
+"Valid Post 2","Body of post 2",1,201
+"Empty Title","",1,201
+"Empty Body","Body of post 3",,201
+</code></pre>
+        </div>
+
+        <h4>Reading Data from an External File</h4>
+        <p>We can create a fixture that reads the CSV file and transforms it into a Python data structure (like a list of dictionaries) to be used in the tests.</p>
+        <p><strong>File: `conftest.py` (adding the new fixture)</strong></p>
+        <pre><code>import csv
+
+def load_csv_test_cases(path):
+    """Reads a CSV file and returns a list of dictionaries."""
+    cases = []
+    with open(path, mode='r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            cases.append(row)
+    return cases
+
+@pytest.fixture(scope="session")
+def post_test_cases():
+    """Fixture that loads test cases from the CSV file."""
+    return load_csv_test_cases("aula3/casos_de_teste.csv")
+</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>3. Dynamic Parametrization with `@pytest.mark.parametrize`</h2>
+        <div class="concept">
+            <h4>What is `@pytest.mark.parametrize`?</h4>
+            <p>It's a Pytest decorator that allows you to run the same test function with different arguments. This is the key to data-driven testing.</p>
+        </div>
+
+        <h4>Combining Fixtures and Parametrization</h4>
+        <p>We can use the fixture that loads data from the CSV to feed `@pytest.mark.parametrize`. This makes the test "dynamic," as adding a new row to the CSV automatically creates a new test case without changing the Python code.</p>
+
+        <p><strong>Test file (`solution.py`):</strong></p>
+        <pre><code>import pytest
+
+# The 'post_test_cases' fixture comes from conftest.py
+@pytest.mark.parametrize("test_case", post_test_cases)
+def test_create_post_dynamically(base_url, api_client, test_case):
+    """Tests post creation based on data from the CSV."""
+    # Prepare the payload data
+    payload = {
+        "title": test_case["title"],
+        "body": test_case["body"],
+        "userId": int(test_case["userId"]) if test_case["userId"] else 1
+    }
+    expected_status = int(test_case["expected_status"])
+
+    # Send the request
+    response = api_client.post(f"{base_url}/posts", json=payload)
+
+    # Validate the result
+    assert response.status_code == expected_status
+    if expected_status == 201:
+        assert response.json()["title"] == payload["title"]
+</code></pre>
+        <p>In this example, the `test_create_post_dynamically` test will run once for each row in the `test_cases.csv` file.</p>
+    </div>
+
+    <div class="slide">
+        <h2>4. Custom Decorators and Test Marking</h2>
+        <div class="concept">
+            <h4>What are Markers?</h4>
+            <p>Markers are "tags" you can apply to your tests to categorize them. For example, you can mark tests as `slow`, `smoke`, or, in our case, `api_test`.</p>
+            <p>This allows you to run only a subset of tests. Ex: `pytest -m api_test`.</p>
+        </div>
+
+        <h4>Creating a Custom Decorator</h4>
+        <p>To create a custom marker, you need to register it in the `pytest.ini` file to avoid warnings.</p>
+        
+        <p><strong>File: `pytest.ini`</strong></p>
+        <pre><code>[pytest]
+markers =
+    api_test: Marks a test as an API test.
+</code></pre>
+
+        <p><strong>How to use the marker in the test:</strong></p>
+        <pre><code>import pytest
+
+@pytest.mark.api_test
+def test_example_api_test():
+    """This test will be run with 'pytest -m api_test'."""
+    assert True
+</code></pre>
+        <p>Now you can organize your test suite and run only the categories that interest you, making the testing process more flexible and efficient.</p>
+    </div>
+
+    <div class="slide">
+        <h2>Day 3 Exercises</h2>
+        <p>Now, let's apply these concepts to refactor the tests from previous lessons and create new dynamic tests.</p>
+        <ol>
+            <li><strong>Refactor:</strong> Move the base URL and the `requests` client to fixtures in `conftest.py`.</li>
+            <li><strong>Create `test_cases.csv`:</strong> Add different scenarios for creating posts (valid, with optional fields, etc.).</li>
+            <li><strong>Implement Parametrized Test:</strong> Create a test that uses `@pytest.mark.parametrize` to read the CSV and execute a `POST` for each case.</li>
+            <li><strong>Add Custom Marker:</strong> Create the `@api_test` marker and apply it to all API tests.</li>
+            <li><strong>Save the Solution:</strong> The new refactored solution with the new tests should be saved in `aula3/solucao.py`.</li>
+        </ol>
+    </div>
+
+</body>
+</html>

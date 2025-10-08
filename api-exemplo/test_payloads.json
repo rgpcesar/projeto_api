@@ -1,0 +1,51 @@
+{
+  "user_creation": {
+    "create_user": {
+      "username": "testuser",
+      "email": "test@example.com",
+      "password": "password"
+    },
+    "create_user_missing_fields": {
+      "username": "testuser"
+    },
+    "update_user": {
+      "username": "newusername"
+    }
+  },
+  "post_creation": {
+    "create_post": {
+      "title": "Test Post",
+      "content": "This is a test post."
+    },
+    "create_post_missing_title": {
+      "content": "This is a test post."
+    },
+    "create_post_missing_content": {
+      "title": "Test Post"
+    },
+    "create_post_special_chars": {
+      "title": "Test Post!",
+      "content": "This is a test post."
+    },
+    "create_post_no_data": {},
+    "update_post": {
+      "title": "New Title"
+    }
+  },
+  "csv_posts": [
+    {
+      "username": "testuser1",
+      "email": "test1@example.com",
+      "password": "password",
+      "title": "CSV Post 1",
+      "content": "Content for CSV post 1."
+    },
+    {
+      "username": "testuser2",
+      "email": "test2@example.com",
+      "password": "password",
+      "title": "CSV Post 2",
+      "content": "Content for CSV post 2."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:16 --- Starting test: test_get_comments_for_post ---
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:23 Requesting URL: https://jsonplaceholder.typicode.com/comments with params: {'postId': 1}
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:25 Response Status Code: 200
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:36 --- Finished test: test_get_comments_for_post ---

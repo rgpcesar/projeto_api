@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing with Python - Day 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            color: #d44950;
+        }
+        .slide {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .diagram {
+            background-color: #eef;
+            border: 1px solid #99c;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Testing with Python - Day 2</h1>
+    <h3>Advanced Topics: Query Params, Headers, Auth, and Assertions</h3>
+
+    <div class="slide">
+        <h2>1. Testing with Query Parameters</h2>
+        <h4>What are they?</h4>
+        <p>Imagine you're in a huge library (the API) and you want to ask the librarian (the server) for books. If you just say "give me books," you might get thousands. It's much more efficient to be specific.</p>
+        <p><strong>Query Parameters</strong> are like filters you add to your request. They come at the end of the URL, starting with a <code>?</code>, and allow you to specify exactly what you're looking for.</p>
+        <p>The structure is <code>key=value</code>. If you have multiple filters, they are separated by an <code>&</code>.</p>
+        <p>Example URL: <code>https://api.example.com/posts?userId=1&status=published</code></p>
+        <ul>
+            <li><code>?</code>: Marks the beginning of the query parameters.</li>
+            <li><code>userId=1</code>: First filter. The key is <code>userId</code> and the value is <code>1</code>.</li>
+            <li><code>&</code>: Separates the filters.</li>
+            <li><code>status=published</code>: Second filter. The key is <code>status</code> and the value is <code>published</code>.</li>
+        </ul>
+
+        <h4>Flow Diagram:</h4>
+        <div class="diagram">
+            CLIENT --> GET /posts?userId=1 --> SERVER<br>
+            (Your script)                             (API)<br>
+            <br>
+            SERVER --> Responds only with posts where userId is 1 --> CLIENT
+        </div>
+
+        <h4>How to Test?</h4>
+        <p>The goal of the test is to ensure that the API respects the filters you sent. If you only requested posts from user 1, the response MUST ONLY contain posts from user 1.</p>
+        <p><strong>Test Steps:</strong></p>
+        <ol>
+            <li>Build the request with the desired query parameters.</li>
+            <li>Send the request to the API.</li>
+            <li>Check if the status code is 200 (OK).</li>
+            <li>Analyze the response body. Go through each item in the list and check if it matches the filter sent.</li>
+        </ol>
+
+        <h4>Practical Example with JSONPlaceholder</h4>
+        <p>Let's request all posts from the user with <code>userId=1</code>.</p>
+        <p><strong>Request:</strong></p>
+        <pre><code>GET https://jsonplaceholder.typicode.com/posts?userId=1</code></pre>
+        <p><strong>Part of the Expected JSON Response:</strong></p>
+        <pre><code>[
+  {
+    "userId": 1,
+    "id": 1,
+    "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+    "body": "quia et suscipit..."
+  },
+  {
+    "userId": 1,
+    "id": 2,
+    "title": "qui est esse",
+    "body": "est rerum tempore vitae..."
+  }
+]</code></pre>
+        <p>The test should iterate over this list and use an assertion like <code>assert post['userId'] == 1</code> for each item.</p>
+    </div>
+
+    <div class="slide">
+        <h2>2. Implementing Tests with Custom Headers</h2>
+        <h4>What are Headers?</h4>
+        <p>If the URL is the address you send a letter to and the body is the content of the letter, the <strong>Headers</strong> are like information on the envelope: sender, recipient, and maybe a stamp for "Urgent" or "Confidential".</p>
+        <p>They carry metadata about your request, such as the content format (<code>Content-Type</code>), the content size (<code>Content-Length</code>), or authentication information.</p>
+        <p>A <strong>custom header</strong> is one you create for a specific purpose, usually starting with <code>X-</code> (e.g., <code>X-Request-ID</code>). It can be used to track a request through multiple systems or to trigger special behavior in the API.</p>
+
+        <h4>Flow Diagram with an Echo API:</h4>
+        <p>To test headers, we use an "echo" API like <code>httpbin.org</code>, which simply returns what we send it.</p>
+        <div class="diagram">
+            CLIENT --> GET /headers with Header "X-Test: true" --> SERVER (httpbin)<br>
+            <br>
+            SERVER (httpbin) --> Responds with a JSON containing all received headers --> CLIENT
+        </div>
+
+        <h4>How to Test?</h4>
+        <p>The test checks if the server "saw" the custom header you sent.</p>
+        <p><strong>Test Steps:</strong></p>
+        <ol>
+            <li>Create a Python dictionary to represent your headers.</li>
+            <li>Send the request, passing the headers.</li>
+            <li>In the response, analyze the JSON to find your header and check if the value is correct.</li>
+        </ol>
+
+        <h4>Practical Example with httpbin.org</h4>
+        <p><strong>Request with Custom Header:</strong></p>
+        <pre><code># In Python, it would look like this:
+headers = {'X-Test-Mode': 'Active'}
+requests.get('https://httpbin.org/headers', headers=headers)</code></pre>
+        <p><strong>Expected JSON Response:</strong></p>
+        <pre><code>{
+  "headers": {
+    "Accept": "*/*",
+    "Host": "httpbin.org",
+    "User-Agent": "python-requests/2.28.1",
+    "X-Amzn-Trace-Id": "Root=...",
+    "X-Test-Mode": "Active"  // <-- Our header is here!
+  }
+}</code></pre>
+        <p>The test assertion would be: <code>assert response.json()['headers']['X-Test-Mode'] == 'Active'</code>.</p>
+    </div>
+
+    <div class="slide">
+        <h2>3. Simulating Basic Authentication</h2>
+        <h4>What is it?</h4>
+        <p><strong>Basic Auth</strong> is one of the simplest methods to protect an API. It's like having a password to enter a club. You need to present your username and password every time you want to get in.</p>
+        <p>Technically, the client combines the username and password in the format <code>username:password</code>, encodes this string in Base64, and sends it in the <code>Authorization</code> header.</p>
+        <p><code>Authorization: Basic dXNlcjpwYXNzd2Q=</code> (where <code>dXNlcjpwYXNzd2Q=</code> is "user:password" in Base64)</p>
+        <p>Although simple, it is not very secure on unencrypted connections (HTTP), as the password can be easily decoded. Therefore, it should only be used with HTTPS.</p>
+
+        <h4>Flow Diagram:</h4>
+        <div class="diagram">
+            CLIENT --> GET /basic-auth/user/pass with Header "Authorization: Basic dXNlcjpwYXNz" --> SERVER<br>
+            (Sending correct credentials)<br>
+            <br>
+            SERVER --> (Verifies credentials) --> ARE VALID --> Responds with 200 OK and the resource --> CLIENT<br>
+            <br>
+            CLIENT --> GET /basic-auth/user/pass with Header "Authorization: Basic d3Jvbmc6d3Jvbmc=" --> SERVER<br>
+            (Sending wrong credentials)<br>
+            <br>
+            SERVER --> (Verifies credentials) --> ARE INVALID --> Responds with 401 Unauthorized --> CLIENT
+        </div>
+
+        <h4>How to Test?</h4>
+        <p>We test the two main scenarios:</p>
+        <ol>
+            <li><strong>Happy Path:</strong> Send correct credentials and expect a <code>200 OK</code> status code, which means "access granted".</li>
+            <li><strong>Sad Path:</strong> Send wrong credentials (or none) and expect a <code>401 Unauthorized</code> status code, which means "access denied".</li>
+        </ol>
+        <p>The <code>requests</code> library in Python simplifies this with the <code>auth</code> parameter.</p>
+
+        <h4>Practical Example with httpbin.org</h4>
+        <p>The <code>/basic-auth/{user}/{pass}</code> endpoint of httpbin expects the user and password to be the same as defined in the URL.</p>
+        <p><strong>Request with Correct Credentials:</strong></p>
+        <pre><code># In Python:
+requests.get('https://httpbin.org/basic-auth/testuser/testpass', auth=('testuser', 'testpass'))
+# Expected response: Status Code 200</code></pre>
+        <p><strong>Request with Wrong Credentials:</strong></p>
+        <pre><code># In Python:
+requests.get('https://httpbin.org/basic-auth/testuser/testpass', auth=('wrong', 'credentials'))
+# Expected response: Status Code 401</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>4. Sending a Bearer Token</h2>
+        <h4>What is it?</h4>
+        <p><strong>Bearer Token</strong> is a modern authentication scheme. The word "Bearer" means "carrier". Whoever "carries" the token has access to the resources. It's like a ticket to a concert: the security guard doesn't need to know who you are, just if you have a valid ticket.</p>
+        <p>The token is a long string of characters, usually generated by an authentication server after login. It is sent in the <code>Authorization</code> header.</p>
+        <p><code>Authorization: Bearer <long-and-complex-token-string></code></p>
+        <p>It is the standard method in technologies like OAuth 2.0 and JWT (JSON Web Tokens).</p>
+
+        <h4>Flow Diagram:</h4>
+        <div class="diagram">
+            CLIENT --> GET /resource with Header "Authorization: Bearer <token>" --> RESOURCE SERVER<br>
+            <br>
+            RESOURCE SERVER --> (Validates the token) --> IS IT VALID? --> Responds with 200 OK and the resource --> CLIENT<br>
+            <br>
+            RESOURCE SERVER --> (Validates the token) --> IS IT INVALID? --> Responds with 401 Unauthorized --> CLIENT
+        </div>
+
+        <h4>How to Test?</h4>
+        <p>The test checks if the API grants access when a valid token is provided and denies it when the token is missing or invalid.</p>
+        <p><strong>Test Steps:</strong></p>
+        <ol>
+            <li>Obtain a token (for testing, it can be a mock value).</li>
+            <li>Create the <code>Authorization</code> header in the format <code>Bearer <token></code>.</li>
+            <li>Send the request with the header.</li>
+            <li>Check if the response is <code>200 OK</code> and if the response body indicates that the authentication was successful.</li>
+        </ol>
+
+        <h4>Practical Example with httpbin.org</h4>
+        <p>The <code>/bearer</code> endpoint of httpbin simulates protection by Bearer Token.</p>
+        <p><strong>Request with Token:</strong></p>
+        <pre><code># In Python:
+token = 'a-test-token-123'
+headers = {'Authorization': f'Bearer {token}'}
+requests.get('https://httpbin.org/bearer', headers=headers)</code></pre>
+        <p><strong>Expected JSON Response:</strong></p>
+        <pre><code>{
+  "authenticated": true, 
+  "token": "a-test-token-123"
+}</code></pre>
+        <p>The assertions would check if <code>authenticated</code> is <code>true</code> and if the <code>token</code> in the response is the same as the one we sent.</p>
+    </div>
+
+    <div class="slide">
+        <h2>5. Advanced Content Assertions (Schema Validation)</h2>
+        <h4>Why go beyond the basics?</h4>
+        <p>Checking if <code>"name": "John"</code> is good, but it's not enough. What if one day the API starts returning <code>"full_name": "John"</code>? Or if the user ID, which was always a number, suddenly becomes a string (<code>"id": "123"</code>)? This would break the client application.</p>
+        <p><strong>Advanced assertions</strong>, also known as <strong>schema validation</strong>, guarantee the API "contract". They check the structure and data types of the response, regardless of the values.</p>
+
+        <h4>Types of Validation:</h4>
+        <ul>
+            <li><strong>Type Validation:</strong> Is the <code>id</code> field an integer (<code>int</code>)? Is the <code>name</code> field a string (<code>str</code>)? Is the <code>tags</code> field a list (<code>list</code>)?</li>
+            <li><strong>Presence Validation:</strong> Does the user object always contain the keys <code>id</code>, <code>name</code>, and <code>email</code>? None of them can be missing.</li>
+            <li><strong>Structure Validation:</strong> Is the <code>address</code> field an object (<code>dict</code>) which, in turn, contains the keys <code>street</code> and <code>city</code>?</li>
+            <li><strong>Format/Content Validation:</strong> Is the <code>posts</code> array not empty? Does the <code>email</code> field contain an <code>@</code>?</li>
+        </ul>
+
+        <h4>How to Test?</h4>
+        <p>After receiving the API response, we use a series of assertions to dissect the JSON and check each of these rules.</p>
+
+        <h4>Practical Example with JSONPlaceholder</h4>
+        <p>Let's validate the schema of a user object.</p>
+        <p><strong>Request:</strong></p>
+        <pre><code>GET https://jsonplaceholder.typicode.com/users/1</code></pre>
+        <p><strong>JSON Response:</strong></p>
+        <pre><code>{
+  "id": 1,
+  "name": "Leanne Graham",
+  "username": "Bret",
+  "email": "Sincere@april.biz",
+  "address": {
+    "street": "Kulas Light",
+    "suite": "Apt. 556",
+    "city": "Gwenborough",
+    "zipcode": "92998-3874",
+    "geo": {
+      "lat": "-37.3159",
+      "lng": "81.1496"
+    }
+  },
+  "phone": "1-770-736-8031 x56442",
+  "website": "hildegard.org",
+  "company": {
+    "name": "Romaguera-Crona",
+    "catchPhrase": "Multi-layered client-server neural-net",
+    "bs": "harness real-time e-markets"
+  }
+}</code></pre>
+        <p><strong>Assertion Examples in Python:</strong></p>
+        <pre><code>data = response.json()
+
+# Type validation
+assert isinstance(data['id'], int)
+assert isinstance(data['name'], str)
+assert isinstance(data['address'], dict)
+
+# Presence and structure validation
+assert 'email' in data
+assert 'address' in data
+assert 'street' in data['address']
+assert 'geo' in data['address']
+assert isinstance(data['address']['geo'], dict)
+assert 'lat' in data['address']['geo']
+
+# Content validation
+assert '@' in data['email']
+assert len(data['name']) > 0
+</code></pre>
+    </div>
+
+    <div class="slide">
+        <h2>Practical Challenges - Day 2</h2>
+        <p>APIs for the challenges:
+            <a href="https://jsonplaceholder.typicode.com/" target="_blank">JSONPlaceholder</a> and
+            <a href="https://httpbin.org/" target="_blank">httpbin.org</a>.
+        </p>
+
+        <h3>Query Params</h3>
+        <p><strong>1.</strong> Fetch all comments for post ID 2 and verify that all returned comments belong to that post.</p>
+        <p><strong>2.</strong> List all todos for user ID 5 and verify that the list is not empty.</p>
+        <p><strong>3.</strong> Fetch all albums for user ID 9 and count how many they have (should be 10).</p>
+        <p><strong>4.</strong> List all completed todos (<code>completed: true</code>) for user ID 1 and verify that all in the response are indeed completed.</p>
+
+        <h3>Headers</h3>
+        <p><strong>5.</strong> Send a request to <code>httpbin.org/headers</code> with the custom header <code>X-Custom-Header: MyValue</code> and validate the response.</p>
+        <p><strong>6.</strong> Send a request to <code>httpbin.org/response-headers</code> to set a custom response header (e.g., <code>My-Test-Header: Hello</code>) and check if it is present in the response headers.</p>
+        <p><strong>7.</strong> Send a request to <code>httpbin.org/headers</code> with a custom <code>User-Agent</code> header ("My-Test-Agent/1.0") and validate if it was received correctly.</p>
+        <p><strong>8.</strong> Send multiple custom headers (<code>X-Header-1: Value1</code>, <code>X-Header-2: Value2</code>) in a single request to <code>httpbin.org/headers</code> and validate all of them.</p>
+
+        <h3>Authentication</h3>
+        <p><strong>9.</strong> Test the httpbin Basic Auth endpoint (<code>/basic-auth/user/passwd</code>) with the correct credentials (user, passwd) and validate the 200 status.</p>
+        <p><strong>10.</strong> Test the same Basic Auth endpoint with a correct user but wrong password and validate the 401 status.</p>
+        <p><strong>11.</strong> Send a request to <code>httpbin.org/bearer</code> with a valid Bearer Token (mock, e.g., "my-mock-token") and validate the successful authentication.</p>
+        <p><strong>12.</strong> Send a request to <code>httpbin.org/bearer</code> without any authorization header and validate if the response is 401.</p>
+
+        <h3>Advanced Assertions</h3>
+        <p><strong>13.</strong> Fetch user with ID 1 from JSONPlaceholder and validate the data types of the keys <code>id</code> (int), <code>name</code> (str), <code>address</code> (dict), and <code>company</code> (dict).</p>
+        <p><strong>14.</strong> For the same user, check if the <code>address</code> key contains the sub-keys <code>street</code>, <code>city</code>, and <code>zipcode</code>.</p>
+        <p><strong>15.</strong> Fetch post with ID 10 and validate if the keys <code>userId</code> and <code>id</code> are integers and if <code>title</code> and <code>body</code> are non-empty strings.</p>
+        <p><strong>16.</strong> List the photos from album with ID 1 and check if each photo in the response contains the keys <code>albumId</code>, <code>id</code>, <code>title</code>, <code>url</code>, and <code>thumbnailUrl</code>.</p>
+        <p><strong>17.</strong> Check if the <code>email</code> key of user with ID 3 follows a valid email format (contains "@" and "." in the domain part).</p>
+        <p><strong>18.</strong> Fetch the comments for post with ID 5 and check if the list of comments is not empty.</p>
+        <p><strong>19.</strong> For the first comment from the previous list, validate the types of <code>postId</code> (int), <code>id</code> (int), <code>name</code> (str), <code>email</code> (str), and <code>body</code> (str).</p>
+        <p><strong>20.</strong> Fetch the todo with ID 199 and check if the value of the <code>completed</code> key is a boolean (<code>True</code> or <code>False</code>).</p>
+    </div>
+</body>
+</html>

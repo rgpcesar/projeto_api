@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solution Guide: API Test Framework</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            color: #d44950;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .explanation {
+            background-color: #e7f3fe;
+            border-left: 5px solid #2196F3;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+        .warning {
+            background-color: #fffbe6;
+            border-left: 5px solid #ffc107;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Day 4 - Generate reports in HTML and Allure</h1>
+        <h2>Solution Guide Example: API Test Framework</h2>
+        <p>This document explains the structure and functionality of the test framework located in the <code>/aula4/solucao/</code> directory. This framework is the result of completing the exercises from Day 4.</p>
+
+        <div class="section">
+            <h2>Framework Structure</h2>
+            <p>The framework is organized into a simple and scalable structure:</p>
+            <pre><code>/aula4/solucao/
+├── conftest.py
+├── pytest.ini
+├── tests/
+│   ├── __init__.py
+│   ├── test_github_api.py
+│   └── test_jsonplaceholder_api.py
+└── test_run.log (generated after a test run)
+</code></pre>
+        </div>
+
+        <div class="section">
+            <h2>File Breakdown</h2>
+
+            <div class="explanation">
+                <h3><code>conftest.py</code></h3>
+                <p>This is the most important file for configuring pytest. It acts as a local plugin repository for our framework.</p>
+                <ul>
+                    <li><strong>`setup_logging()` and `pytest_sessionstart`</strong>: These work together to configure logging (to console and `test_run.log`) once at the very beginning of the test session.</li>
+                    <li><strong>`ApiClient` class</strong>: A custom class that inherits from `requests.Session`. Its main purpose is to "remember" the last API response by storing it in `self.last_response`. This is crucial for our reporting hook.</li>
+                    <li><strong>`api_client` fixture</strong>: A session-scoped fixture that creates and provides a single instance of our `ApiClient` to all tests. This is efficient and allows us to share state (like the last response) across the test session if needed.</li>
+                    <li><strong>`pytest_runtest_makereport` hook</strong>: This powerful hook inspects the result of each test. If a test fails, it checks if the `api_client` was used, retrieves the `last_response` from it, and injects the response body directly into the HTML report. This makes debugging assertion errors much faster.</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h3><code>pytest.ini</code></h3>
+                <p>This file provides default command-line arguments for pytest, so you don't have to type them every time.</p>
+                <ul>
+                    <li><strong>`log_cli = true`</strong>: Enables live logging to the console during the test run.</li>
+                    <li><strong>`log_cli_level = INFO`</strong>: Sets the default verbosity of the console logs to `INFO` and higher (INFO, WARNING, ERROR, CRITICAL).</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h3><code>tests/</code> directory</h3>
+                <p>This directory contains all our test suites, organized by the API they target.</p>
+                <ul>
+                    <li><strong>`__init__.py`</strong>: An empty file that tells Python to treat the `tests` directory as a package. This helps with imports and test discovery.</li>
+                    <li><strong>`test_github_api.py` & `test_jsonplaceholder_api.py`</strong>: These files contain the actual test cases, refactored to use the framework's features. Notice they no longer import `requests` directly but instead receive the `api_client` fixture. They also use `logging` for detailed output and `@allure` decorators for rich reporting.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>How to Run the Tests</h2>
+            <p>To execute the tests, navigate to the framework's root directory in your terminal:</p>
+            <pre><code>cd /path/to/your/project/aula4/solucao/</code></pre>
+            
+            <h3>Basic Test Run</h3>
+            <p>Simply run `pytest`. Thanks to `pytest.ini`, this will execute all tests and show `INFO` level logs in your console.</p>
+            <pre><code>pytest</code></pre>
+
+            <h3>Running with a Different Log Level</h3>
+            <p>To see more detailed logs (e.g., `DEBUG`), you can override the setting from `pytest.ini` on the command line:</p>
+            <pre><code>pytest -o log_cli_level=DEBUG</code></pre>
+
+            <h3>Generating the HTML Report</h3>
+            <p>To generate a self-contained HTML report, use the `--html` flag. This is useful for a quick, shareable summary.</p>
+            <pre><code>pytest --html=report.html</code></pre>
+            <p>After running, a `report.html` file will be created. Open it in your browser. If any test fails, you will see the "API Response Body" section thanks to our hook.</p>
+
+            <h3>Generating and Viewing the Allure Report</h3>
+            <p>Allure provides a much richer, interactive report. This is a multi-step process.</p>
+
+            <div class="warning">
+                <h4>Prerequisite: Install Allure Commandline</h4>
+                <p>The `allure-pytest` plugin only creates the result files. To generate and view the HTML report, you need the Allure command-line tool. If you see an error like <code>zsh: command not found: allure</code>, you need to install it.</p>
+                <p><strong>On macOS with Homebrew (Recommended):</strong></p>
+                <pre><code>brew install allure</code></pre>
+                <p>For other operating systems, please refer to the official Allure documentation.</p>
+            </div>
+            
+            <h4>Step 1: Generate Allure result files</h4>
+            <p>This command runs the tests and saves the Allure report data (in JSON format) to a directory.</p>
+            <pre><code>pytest --alluredir=./allure-results</code></pre>
+
+            <h4>Step 2: Serve the Allure report</h4>
+            <p>This command uses the Allure command-line tool to generate the HTML report from the JSON files and open it in your browser.</p>
+            <pre><code>allure serve ./allure-results</code></pre>
+            <p>You can now explore the interactive report, see the detailed steps for each test, and view any attachments you added (like the JSON response bodies).</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:47 --- Starting test: test_get_completed_todos_for_user ---
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:54 Requesting URL: https://jsonplaceholder.typicode.com/todos with params: {'userId': 1, 'completed': 'true'}
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:56 Response Status Code: 200
+[32mINFO    [0m tests.test_jsonplaceholder_api:test_jsonplaceholder_api.py:67 --- Finished test: test_get_completed_todos_for_user ---
